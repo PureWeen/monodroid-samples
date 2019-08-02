@@ -8,6 +8,7 @@ using Android.OS;
 using Android.Graphics;
 using Android.Media;
 using System.Threading;
+using Android.Support.V4.App;
 
 namespace NotificationsLab
 {
@@ -91,14 +92,18 @@ namespace NotificationsLab
             //  2. Calls methods on the builder to optionally plug in the large icon, extend
             //     the style (if called for by a spinner selection), set the visibility, set 
             //     the priority, and set the category. 
-            //  3. Uses the builder to instantiate the notification.
+            //  3. Uses the builder to instantiate the NotificationCompat.
             //  4. Turns on sound and vibrate (if selected).
-            //  5. Uses the Notification Manager to launch the notification.
+            //  5. Uses the Notification Manager to launch the NotificationCompat.
+
+            var mChannel = new NotificationChannel("Default", "Default", NotificationImportance.High);
+        
+            notificationManager.CreateNotificationChannel(mChannel);
 
             launchBtn.Click += delegate
             {
                 // Instantiate the notification builder:
-				Notification.Builder builder = new Notification.Builder(this)
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "Default")
 					.SetContentTitle("Sample Notification")
                     .SetContentText(notifyMsg.Text)
                     .SetSmallIcon(Resource.Drawable.ic_notification)
@@ -120,7 +125,7 @@ namespace NotificationsLab
 					    builder.SetContentTitle("Big Text Notification");
 
                         // Using the Big Text style:
-                        var textStyle = new Notification.BigTextStyle();
+                        var textStyle = new NotificationCompat.BigTextStyle();
 
                         // Use the text in the edit box at the top of the screen.
                         textStyle.BigText(notifyMsg.Text);
@@ -138,7 +143,7 @@ namespace NotificationsLab
                         // summary constructed below.
 
                         // Using the inbox style:
-                        var inboxStyle = new Notification.InboxStyle();
+                        var inboxStyle = new NotificationCompat.InboxStyle();
 
                         // Set the title of the notification:
                         builder.SetContentTitle("5 new messages");
@@ -163,7 +168,7 @@ namespace NotificationsLab
 					    builder.SetContentTitle("Image Notification");
 
                         // Using the Big Picture style:
-                        var picStyle = new Notification.BigPictureStyle();
+                        var picStyle = new NotificationCompat.BigPictureStyle();
 
                         // Convert the image file to a bitmap before passing it into the style
                         // (there is no exception handler since we know the size of the image):
@@ -192,13 +197,13 @@ namespace NotificationsLab
                 switch (visibilitySpinner.SelectedItem.ToString())
                 {
                     case "Public":
-                        builder.SetVisibility(NotificationVisibility.Public);
+                        builder.SetVisibility((int)NotificationVisibility.Public);
                         break;
                     case "Private":
-                        builder.SetVisibility(NotificationVisibility.Private);
+                        builder.SetVisibility((int)NotificationVisibility.Private);
                         break;
                     case "Secret":
-                        builder.SetVisibility(NotificationVisibility.Secret);
+                        builder.SetVisibility((int)NotificationVisibility.Secret);
                         break;
                 }
 
@@ -226,49 +231,49 @@ namespace NotificationsLab
                 switch (categorySpinner.SelectedItem.ToString())
                 {
                     case "Call":
-                        builder.SetCategory(Notification.CategoryCall);
+                        builder.SetCategory(NotificationCompat.CategoryCall);
                         break;
                     case "Message":
-                        builder.SetCategory(Notification.CategoryMessage);
+                        builder.SetCategory(NotificationCompat.CategoryMessage);
                         break;
                     case "Alarm":
-                        builder.SetCategory(Notification.CategoryAlarm);
+                        builder.SetCategory(NotificationCompat.CategoryAlarm);
                         break;
                     case "Email":
-                        builder.SetCategory(Notification.CategoryEmail);
+                        builder.SetCategory(NotificationCompat.CategoryEmail);
                         break;
                     case "Event":
-                        builder.SetCategory(Notification.CategoryEvent);
+                        builder.SetCategory(NotificationCompat.CategoryEvent);
                         break;
                     case "Promo":
-                        builder.SetCategory(Notification.CategoryPromo);
+                        builder.SetCategory(NotificationCompat.CategoryPromo);
                         break;
                     case "Progress":
-                        builder.SetCategory(Notification.CategoryProgress);
+                        builder.SetCategory(NotificationCompat.CategoryProgress);
                         break;
                     case "Social":
-                        builder.SetCategory(Notification.CategorySocial);
+                        builder.SetCategory(NotificationCompat.CategorySocial);
                         break;
                     case "Error":
-                        builder.SetCategory(Notification.CategoryError);
+                        builder.SetCategory(NotificationCompat.CategoryError);
                         break;
                     case "Transport":
-                        builder.SetCategory(Notification.CategoryTransport);
+                        builder.SetCategory(NotificationCompat.CategoryTransport);
                         break;
                     case "System":
-                        builder.SetCategory(Notification.CategorySystem);
+                        builder.SetCategory(NotificationCompat.CategorySystem);
                         break;
                     case "Service":
-                        builder.SetCategory(Notification.CategoryService);
+                        builder.SetCategory(NotificationCompat.CategoryService);
                         break;
                     case "Recommendation":
-                        builder.SetCategory(Notification.CategoryRecommendation);
+                        builder.SetCategory(NotificationCompat.CategoryRecommendation);
                         break;
                     case "Status":
-                        builder.SetCategory(Notification.CategoryStatus);
+                        builder.SetCategory(NotificationCompat.CategoryStatus);
                         break;
                     default:
-                        builder.SetCategory(Notification.CategoryStatus);
+                        builder.SetCategory(NotificationCompat.CategoryStatus);
                         break;
                 }
 					
@@ -279,7 +284,7 @@ namespace NotificationsLab
 				secondIntent.PutExtra ("message", notifyMsg.Text);
 
                 // Pressing the Back button in SecondActivity exits the app:
-                TaskStackBuilder stackBuilder = TaskStackBuilder.Create(this);
+                var stackBuilder = Android.Support.V4.App.TaskStackBuilder.Create(this);
 
 				// Add the back stack for the intent:
 				stackBuilder.AddParentStack(Java.Lang.Class.FromType(typeof(SecondActivity)));
@@ -288,7 +293,7 @@ namespace NotificationsLab
 				// pending intent can be used only once (one shot):
                 stackBuilder.AddNextIntent(secondIntent);
                 const int pendingIntentId = 0;
-                PendingIntent pendingIntent = stackBuilder.GetPendingIntent(pendingIntentId, PendingIntentFlags.OneShot);
+                PendingIntent pendingIntent = stackBuilder.GetPendingIntent(pendingIntentId, (int)PendingIntentFlags.OneShot);
 
 				// Uncomment this code to setup an intent so that notifications return to this app:
 				// Intent intent = new Intent (this, typeof(MainActivity));
@@ -303,18 +308,18 @@ namespace NotificationsLab
                 Notification notification = builder.Build();
               
                 // Turn on sound if the sound switch is on:
-                if (soundSw.Checked)
-                    notification.Defaults |= NotificationDefaults.Sound;
+               /* if (soundSw.Checked)
+                    NotificationCompat.DefaultSound |= NotificationDefaults.Sound;
 
                 // Turn on vibrate if the sound switch is on:
                 if (vibrateSw.Checked)
-                    notification.Defaults |= NotificationDefaults.Vibrate;
-
+                    NotificationCompat.Defaults |= NotificationDefaults.Vibrate;
+*/
                 // Notification ID used for all notifications in this app.
                 // Reusing the notification ID prevents the creation of 
                 // numerous different notifications as the user experiments
                 // with different notification settings -- each launch reuses
-                // and updates the same notification.
+                // and updates the same NotificationCompat.
 				const int notificationId = 1;
 
                 // Launch notification:
